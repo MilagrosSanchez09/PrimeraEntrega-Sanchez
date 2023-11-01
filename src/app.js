@@ -1,7 +1,7 @@
 // Importo los módulos y las clases.
 import express from 'express';
-import ProductManager from './ProductManager';
-import CartManager from './CartManager';
+import ProductManager from './ProductManager.js';
+import CartManager from './CartManager.js';
 
 const app = express();
 app.use(express.json());

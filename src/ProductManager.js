@@ -1,5 +1,5 @@
 // Importo los módulos.
-const fs = require('fs').promises;
+import fs from 'fs';
 
 // Creamos la clase ProductManager
 class ProductManager {

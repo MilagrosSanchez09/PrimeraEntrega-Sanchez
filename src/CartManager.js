@@ -1,4 +1,4 @@
-import { promises as fsPromises } from 'fs';
+import fs from 'fs';
 
 class CartManager {
     constructor(cartFilePath, bookFilePath) {
