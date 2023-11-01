@@ -1,16 +1,17 @@
 import fs from 'fs';
 
 class CartManager {
-    constructor(cartFilePath, bookFilePath) {
+    constructor(cartFilePath, productFilePath) {
         this.carts = [];
         this.newCartId = 1;
         this.cartsFilePath = cartFilePath;
+        this.productFilePath = productFilePath;
         this.initialize();
     }
 
     async initialize() {
         try {
-            const cartsData = await fs.readFile(this.cartsFilePath, 'utf-8');
+            const cartsData = await fs.promises.readFile(this.cartsFilePath, 'utf-8');
             this.carts = JSON.parse(cartsData);
             this.newCartId = Math.max(...this.carts.map((cart) => cart.id)) + 1;
         } catch (error) {
@@ -23,7 +24,7 @@ class CartManager {
         }
 
         try {
-            const booksData = await fs.readFile(this.booksFilePath, 'utf-8');
+            const booksData = await fs.promises.readFile(this.productFilePath, 'utf-8');
             this.products = JSON.parse(booksData);
         } catch (error) {
             throw error;
@@ -48,7 +49,7 @@ class CartManager {
 
     async loadCartsFromFile() {
         try {
-            const cartsData = await fs.readFile(this.cartsFilePath, 'utf-8');
+            const cartsData = await fs.promises.readFile(this.cartsFilePath, 'utf-8');
             return JSON.parse(cartsData);
         } catch (error) {
             return [];

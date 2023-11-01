@@ -13,9 +13,13 @@ class ProductManager {
     // Función asíncrona para inicializar.
     async initialize() {
         try {
-            const booksData = await fs.readFile(this.booksFilePath, 'utf-8');
+            const booksData = await fs.promises.readFile(this.booksFilePath, 'utf-8');
             this.products = JSON.parse(booksData);
-            this.newId = Math.max(...this.products.map((product) => product.id)) + 1;
+            if (this.products.length > 0) {
+                this.newId = Math.max(...this.products.map((product) => product.id)) + 1;
+            } else {
+                this.newId = 1;
+            }
         } catch (error) {
             if (error.code === 'ENOENT') {
                 console.log('No se han encontrado los archivos, se asignará un ID a cada elemento agregado.');
@@ -27,7 +31,7 @@ class ProductManager {
     }
 
     async readProductsFile() {
-        this.product = await fs.promise.readFile(this.path);
+        this.products = await fs.promises.readFile(this.booksFilePath, 'utf-8');
     }
 
     // Método para validar los campos que se deben completar para cada libro.
@@ -43,7 +47,7 @@ class ProductManager {
 
     // Función asíncrona para agregar un producto.
     async addProduct(product) {
-        await this.readProductsFile();
+        this.readProductsFile();
         if (!this.isValidProduct(product)) {
             return 'Todos los campos son obligatorios.';
         }
@@ -56,7 +60,7 @@ class ProductManager {
 
         product.id = this.newId++;
         this.products.push(product);
-        await this.saveProductsToFile();
+        this.saveProductsToFile();
         return 'El producto ha sido agregado correctamente';
     }
 
@@ -110,7 +114,7 @@ class ProductManager {
             await this.readProductsFile(); // Leer productos desde el archivo.
             if (limit) {
                 if (!isNaN(limit)) {
-                    return this.product.slice(0, parseInt(limit, 10));
+                    return this.products.slice(0, parseInt(limit, 10));
                 } else {
                     throw 'El parámetro limit debe ser un número válido.';
                 }

@@ -1,133 +1,4 @@
-// Importo los módulos y las clases.
-import express from 'express';
-import ProductManager from './ProductManager.js';
-import CartManager from './CartManager.js';
-
-const app = express();
-app.use(express.json());
-
-// Nueva instancia de ProductManager.
-const productsFilePath = './src/books.json';
-const productsManager = new ProductManager(productsFilePath);
-
-// Nueva instancia de CartManager.
-const cartsFilePath = './src/cart.json';
-const cartManager = new CartManager(cartsFilePath, productsFilePath);
-
-// Rutas para los productos:
-// Para obtener la lista de libros:
-app.get('/api/products', async (req, res) => {
-  try {
-    const limit = req.query.limit;
-    const products = await productsManager.getProducts(limit);
-    res.json(products);
-  } catch (error) {
-    console.error('Error al obtener productos:', error);
-    res.status(500).send('Se produjo un error al procesar la solicitud.');
-  }
-});
-// Para filtrar por ID.
-app.get('/api/products/:pid', async (req, res) => {
-  try {
-    const productId = parseInt(req.params.pid, 10);
-    const product = await productsManager.getProductById(productId);
-    if (product === 'Not Found') {
-      res.status(404).send('Producto no encontrado');
-    } else {
-      res.json(product);
-    }
-  } catch (error) {
-    console.error('Error al obtener el producto:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-// Para agregar un producto.
-app.post('/api/products', async (req, res) => {
-  try {
-    const newBook = req.body;
-    const result = await productsManager.addProduct(newBook);
-    res.json(result);
-  } catch (error) {
-    console.error('Error al agregar producto:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-// Para actualizar un producto.
-app.put('/api/products/:pid', async (req, res) => {
-  try {
-    const productId = parseInt(req.params.pid, 10);
-    const updatedBooks = req.body;
-    const result = await productsManager.updateProduct(productId, updatedBooks);
-    res.json(result);
-  } catch (error) {
-    console.error('Error al actualizar el producto:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-// Para eliminar un producto.
-app.delete('/api/products/:pid', async (req, res) => {
-  try {
-    const productId = parseInt(req.params.pid, 10);
-    const result = await productsManager.deleteProduct(productId);
-    res.json(result);
-  } catch (error) {
-    console.error('Error al eliminar el producto:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-
-// Rutas para carritos:
-// Para crear nuevos carritos.
-app.post('/api/carts', async (req, res) => {
-  try {
-    const newCart = req.body;
-    const result = await cartManager.createCart(newCart);
-    res.json(result);
-  } catch (error) {
-    console.error('Error al crear el carrito:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-// Para filtrar carritos por ID.
-app.get('/api/carts/:cid', async (req, res) => {
-  try {
-    const cartId = parseInt(req.params.cid, 10);
-    const cart = await cartManager.getCartById(cartId);
-    res.json(cart);
-  } catch (error) {
-    console.error('Error al obtener el carrito:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-// Para agregar productos a un carrito en específico.
-app.post('/api/carts/:cid/product/:pid', async (req, res) => {
-  try {
-    const cartId = parseInt(req.params.cid, 10);
-    const productId = parseInt(req.params.pid, 10);
-    const quantity = req.body.quantity;
-
-    const cart = await cartManager.getCartById(cartId);
-
-    if (cart === 'Not Found'){
-      res.status(404).send('Carrito no encontrado');
-    } else {
-      const product = await productsManager.getProductById(productId);
-
-      if (product === 'Not Found') {
-        res.status(404).send('Producto no encontrado');
-      } else {
-        const result = await cartManager.addProductToCart(cartId, productId, quantity);
-        res.json(result);
-      }
-    }
-  } catch (error) {
-    console.error('Error al agregar producto al carrito:', error);
-    res.status(500).send('Se produjo un error al procesar su solicitud.');
-  }
-});
-
-// Libros a agregar.
-const books = [
+[
   {
     "title": "Dark Memory",
     "author": "Christine Feehan",
@@ -137,7 +8,8 @@ const books = [
     "status": true,
     "thumbnail": "https://m.media-amazon.com/images/I/51YkE0EzAWL.jpg",
     "code": "B1",
-    "stock": 23
+    "stock": 23,
+    "id": 1
   },
   {
     "title": "Fourth Wing",
@@ -148,7 +20,8 @@ const books = [
     "status": true,
     "thumbnail": "https://images.cdn3.buscalibre.com/fit-in/360x360/4d/28/4d28ac1183866f21e774e25142d9a409.jpg",
     "code": "B2",
-    "stock": 15
+    "stock": 15,
+    "id": 2
   },
   {
     "title": "V for Vendetta (New Edition",
@@ -159,7 +32,8 @@ const books = [
     "status": true,
     "thumbnail": "https://http2.mlstatic.com/D_NQ_NP_705973-MLA50789601982_072022-O.webp",
     "code": "B3",
-    "stock": 7
+    "stock": 7,
+    "id": 3
   },
   {
     "title": "Fantastic Beasts and Where to Find Them",
@@ -170,7 +44,8 @@ const books = [
     "status": true,
     "thumbnail": "https://m.media-amazon.com/images/I/51XXxJ0uQzL.jpg",
     "code": "B4",
-    "stock": 13
+    "stock": 13,
+    "id": 4
   },
   {
     "title": "Never Lie",
@@ -181,7 +56,8 @@ const books = [
     "status": true,
     "thumbnail": "https://th.bing.com/th/id/OIP.SpEExoJHk49l3HGW5ZoyhgAAAA?pid=ImgDet&rs=1",
     "code": "B5",
-    "stock": 17
+    "stock": 17,
+    "id": 5
   },
   {
     "title": "Mr. Mercedes",
@@ -192,7 +68,8 @@ const books = [
     "status": true,
     "thumbnail": "https://m.media-amazon.com/images/I/51XXxJ0uQzL.jpg",
     "code": "B6",
-    "stock": 10
+    "stock": 10,
+    "id": 6
   },
   {
     "title": "Icebreaker",
@@ -203,28 +80,7 @@ const books = [
     "status": true,
     "thumbnail": "https://m.media-amazon.com/images/I/713UXYBviuL.jpg",
     "code": "B7",
-    "stock": 15
+    "stock": 15,
+    "id": 7
   }
 ]
-
-// Defino la función addBooks
-async function addBooks(productManager, books) {
-  const addProductPromises = books.map(book => productManager.addProduct(book));
-  await Promise.all(addProductPromises);
-}
-
-// Inicializa ProductManager, y se agregan los libros.
-productsManager.initialize()
-    .then(() => {
-        addBooks(productsManager, books);
-        return cartManager.initialize();
-    })
-    .then(() => {
-      app.listen(8080, () => {
-        console.log('Servidor de gestión de productos y carritos escuchando en el puerto 8080');
-      });
-    })
-    .catch((error) => {
-        console.error('Error al inicializar: ', error);
-    });
-
