@@ -80,6 +80,7 @@ app.delete('/api/products/:pid', async (req, res) => {
 // Para crear nuevos carritos.
 app.post('/api/carts', async (req, res) => {
   try {
+    console.log('Contenido del cuerpo de la solicitud:', req.body);
     const newCart = req.body;
     const result = await cartManager.createCart(newCart);
     res.json(result);
@@ -208,10 +209,33 @@ const books = [
 ]
 
 // Defino la función addBooks
+// Modifica la función addBooks en app.js
 async function addBooks(productManager, books) {
-  const addProductPromises = books.map(book => productManager.addProduct(book));
-  await Promise.all(addProductPromises);
+  try {
+    // Lee los libros existentes desde el archivo JSON
+    await productManager.readProductsFile();
+
+    for (const book of books) {
+      book.id = productManager.newId++;
+      // Agrega cada libro a la lista de productos
+      const result = await productManager.addProduct(book);
+      console.log(result);
+    }
+
+    await productManager.saveProductsToFile();
+  } catch (error) {
+    console.error('Error al agregar libros:', error);
+  }
 }
+
+
+/*async function addBooks(productManager, books) {
+  for (const book of books) {
+    productManager.addProduct(book);
+  }
+}
+*/
+
 
 // Inicializa ProductManager, y se agregan los libros.
 productsManager.initialize()

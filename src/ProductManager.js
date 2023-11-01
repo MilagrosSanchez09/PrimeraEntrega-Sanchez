@@ -15,11 +15,7 @@ class ProductManager {
         try {
             const booksData = await fs.promises.readFile(this.booksFilePath, 'utf-8');
             this.products = JSON.parse(booksData);
-            if (this.products.length > 0) {
-                this.newId = Math.max(...this.products.map((product) => product.id)) + 1;
-            } else {
-                this.newId = 1;
-            }
+            this.newId = Math.max(...this.products.map((product) => product.id)) + 1;
         } catch (error) {
             if (error.code === 'ENOENT') {
                 console.log('No se han encontrado los archivos, se asignará un ID a cada elemento agregado.');
@@ -31,7 +27,9 @@ class ProductManager {
     }
 
     async readProductsFile() {
-        this.products = await fs.promises.readFile(this.booksFilePath, 'utf-8');
+        const booksData = await fs.promises.readFile(this.booksFilePath, 'utf-8');
+        this.products = JSON.parse(booksData);
+        this.newId = Math.max(...this.products.map((product) => product.id)) + 1;
     }
 
     // Método para validar los campos que se deben completar para cada libro.
@@ -47,7 +45,7 @@ class ProductManager {
 
     // Función asíncrona para agregar un producto.
     async addProduct(product) {
-        this.readProductsFile();
+        await this.readProductsFile();
         if (!this.isValidProduct(product)) {
             return 'Todos los campos son obligatorios.';
         }
@@ -60,7 +58,7 @@ class ProductManager {
 
         product.id = this.newId++;
         this.products.push(product);
-        this.saveProductsToFile();
+        await this.saveProductsToFile();
         return 'El producto ha sido agregado correctamente';
     }
 
@@ -144,8 +142,14 @@ class ProductManager {
 
     // Función asíncrona para guardar los datos de los libros.
     async saveProductsToFile() {
-        console.log(this.booksFilePath);
-        await fs.promises.writeFile(this.booksFilePath, JSON.stringify(this.products, null, 2), 'utf-8');
+        try {
+            await fs.promises.writeFile(this.booksFilePath, JSON.stringify(this.products, null, 2), 'utf-8');
+            console.log('Productos guardados correctamente en el archivo');
+        } catch (error){
+            console.error('Error al guardar los productos en el archivo:', error);
+            throw 'Se produjo un error al guardar los productos en el archivo.';
+        }
+        
     }
 }
 

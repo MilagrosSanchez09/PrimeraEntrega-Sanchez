@@ -1,11 +1,12 @@
 import fs from 'fs';
 
 class CartManager {
-    constructor(cartFilePath, productFilePath) {
+    constructor(cartFilePath, bookFilePath) {
         this.carts = [];
         this.newCartId = 1;
+        this.products = [];
         this.cartsFilePath = cartFilePath;
-        this.productFilePath = productFilePath;
+        this.booksFilePath = bookFilePath;
         this.initialize();
     }
 
@@ -13,23 +14,22 @@ class CartManager {
         try {
             const cartsData = await fs.promises.readFile(this.cartsFilePath, 'utf-8');
             this.carts = JSON.parse(cartsData);
-            this.newCartId = Math.max(...this.carts.map((cart) => cart.id)) + 1;
+            const maxId = Math.max(...this.carts.map((cart) => cart.id));
+            this.newCartId = maxId >= 1 ? maxId + 1 : 1;
+
+            const productsData = await fs.promises.readFile(this.booksFilePath, 'utf-8');
+            this.products = JSON.parse(productsData);
         } catch (error) {
             if (error.code === 'ENOENT') {
                 console.log('Archivo de carritos no encontrado. Se le asignará un ID único a cada carrito.');
+                this.newCartId = 1;
                 await this.saveCartsToFile();
             } else {
                 throw error;
             }
         }
-
-        try {
-            const booksData = await fs.promises.readFile(this.productFilePath, 'utf-8');
-            this.products = JSON.parse(booksData);
-        } catch (error) {
-            throw error;
-        }
     }
+
     // Función asíncrona para crear un nuevo carrito de compras y asignarles un nuevo ID.
     async createCart() {
         try {
@@ -50,7 +50,8 @@ class CartManager {
     async loadCartsFromFile() {
         try {
             const cartsData = await fs.promises.readFile(this.cartsFilePath, 'utf-8');
-            return JSON.parse(cartsData);
+            this.carts = JSON.parse(cartsData);
+            return this.carts;
         } catch (error) {
             return [];
         }
@@ -74,8 +75,9 @@ class CartManager {
         if (!cart) {
             throw 'No se ha encontrado el carrito';
         }
-
+        console.log('productId:', productId);
         const product = this.products.find((prod) => prod.id === productId);
+        console.log('product:', product);
         if (!product) {
             throw 'No se ha encontrado el libro';
         }
